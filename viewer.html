@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sketch2Shape - Interactive 3D Inspection</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 40%, #1e293b 0%, #0b0f17 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #F8F3F0;
+      user-select: none;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .btn-back {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 26px;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #F8F3F0;
+      background: linear-gradient(180deg, #015ce0 0%, #014BAA 60%, #00367a 100%);
+      border: 2px solid #002d66;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow:
+        inset 0 2px 1px rgba(248, 243, 240, 0.45),
+        inset 0 -3px 3px rgba(0, 20, 50, 0.7),
+        0 6px 0 #002759,
+        0 8px 1px rgba(0, 0, 0, 0.5),
+        0 14px 24px rgba(1, 75, 170, 0.35);
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+    }
+
+    .btn-back:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 2px 1px rgba(248, 243, 240, 0.55),
+        inset 0 -3px 3px rgba(0, 20, 50, 0.7),
+        0 8px 0 #002759,
+        0 10px 2px rgba(0, 0, 0, 0.55),
+        0 18px 28px rgba(1, 75, 170, 0.45);
+    }
+
+    .btn-back:active {
+      transform: translateY(4px);
+      box-shadow:
+        inset 0 2px 2px rgba(0, 20, 50, 0.8),
+        0 2px 0 #002759,
+        0 3px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .hud-card {
+      pointer-events: auto;
+      background: rgba(11, 15, 23, 0.82);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(248, 243, 240, 0.15);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #F8F3F0;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    }
+
+    .hud-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #014BAA;
+      color: #F8F3F0;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+      pointer-events: auto;
+    }
+
+    .action-chip {
+      padding: 9px 18px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #F8F3F0;
+      background: rgba(11, 15, 23, 0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(248, 243, 240, 0.2);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 150ms, border-color 150ms;
+      text-decoration: none;
+    }
+
+    .action-chip:hover {
+      background: #014BAA;
+      border-color: #F8F3F0;
+    }
+
+    #loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0b0f17;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      gap: 16px;
+      transition: opacity 300ms ease;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(248, 243, 240, 0.2);
+      border-top-color: #014BAA;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <!-- Three.js + Loaders -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+</head>
+<body>
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p id="loading-text" style="letter-spacing: 0.05em; font-weight: 500;">Loading reconstructed 3D asset...</p>
+  </div>
+
+  <div class="top-bar">
+    <a href="interface.html" class="btn-back">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to Canvas
+    </a>
+
+    <div class="hud-card" id="mesh-hud">
+      <div class="hud-badge">INSPECTION ACTIVE</div>
+      <div><strong>Status:</strong> <span id="hud-status">Rendering</span></div>
+      <div><strong>Vertices:</strong> <span id="hud-vertices">Calculating...</span></div>
+      <div><strong>Triangles:</strong> <span id="hud-faces">Calculating...</span></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="action-chip" id="toggle-wireframe">Toggle Wireframe</button>
+    <button class="action-chip" id="toggle-autorotate">Pause Rotation</button>
+    <button class="action-chip" id="reset-cam">Reset View</button>
+    <a class="action-chip" id="download-glb" href="http://127.0.0.1:8000/assets/reconstructed_asset.glb" download>Download .GLB</a>
+    <a class="action-chip" id="download-obj" href="http://127.0.0.1:8000/assets/reconstructed_asset.obj" download>Download .OBJ</a>
+  </div>
+
+  <canvas id="webgl-canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('webgl-canvas');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.001, 1000);
+    camera.position.set(0, 0.8, 2.4);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 2.0;
+    controls.target.set(0, 0, 0);
+
+    // Multi-directional PBR lighting rig
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    keyLight.position.set(5, 8, 5);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x4488ff, 1.0);
+    fillLight.position.set(-5, 3, -5);
+    scene.add(fillLight);
+
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    backLight.position.set(0, -6, 0);
+    scene.add(backLight);
+
+    // Grid Floor
+    const grid = new THREE.GridHelper(3, 24, 0x014BAA, 0x334155);
+    grid.position.y = -0.6;
+    scene.add(grid);
+
+    let activeMesh = null;
+    let isWireframe = false;
+
+    function fitModelToCenter(object3D) {
+      let totalVertices = 0;
+      let totalFaces = 0;
+
+      // 1. Traverse and normalize geometry normals & materials
+      object3D.traverse((child) => {
+        if (child.isMesh && child.geometry) {
+          child.geometry.computeVertexNormals();
+
+          const pos = child.geometry.attributes.position;
+          totalVertices += pos ? pos.count : 0;
+          totalFaces += child.geometry.index ? child.geometry.index.count / 3 : (pos ? pos.count / 3 : 0);
+
+          const hasColors = Boolean(child.geometry.attributes.color);
+
+          child.material = new THREE.MeshStandardMaterial({
+            vertexColors: hasColors,
+            color: 0xffffff,
+            roughness: 0.35,
+            metalness: 0.05,
+            side: THREE.DoubleSide
+          });
+          child.material.needsUpdate = true;
+        }
+      });
+
+      // 2. Compute initial unscaled bounding box
+      let box = new THREE.Box3().setFromObject(object3D);
+      let size = new THREE.Vector3();
+      box.getSize(size);
+
+      // 3. Normalize scale so the largest dimension fits the viewport
+      const maxDimension = Math.max(size.x, size.y, size.z);
+      if (maxDimension > 0) {
+        const scaleFactor = 1.3 / maxDimension;
+        object3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      }
+
+      // 4. Re-calculate bounding box after scaling
+      object3D.updateMatrixWorld(true);
+      box = new THREE.Box3().setFromObject(object3D);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // 5. Center horizontally (X, Z) and snap the bottom (min Y) exactly to Y = 0
+      object3D.position.x -= center.x;
+      object3D.position.z -= center.z;
+      object3D.position.y -= box.min.y;
+
+      // 6. Anchor the ground grid at Y = 0 (flush beneath the model)
+      grid.position.set(0, 0, 0);
+
+      // 7. Aim camera and orbit target at the object's vertical center
+      object3D.updateMatrixWorld(true);
+      const finalBox = new THREE.Box3().setFromObject(object3D);
+      const finalCenter = new THREE.Vector3();
+      finalBox.getCenter(finalCenter);
+
+      controls.target.copy(finalCenter);
+      camera.position.set(0, finalCenter.y + 0.3, 2.2);
+      controls.update();
+
+      document.getElementById('hud-status').textContent = "Model Loaded";
+      document.getElementById('hud-vertices').textContent = totalVertices.toLocaleString();
+      document.getElementById('hud-faces').textContent = Math.round(totalFaces).toLocaleString();
+    }
+
+    const gltfLoader = new THREE.GLTFLoader();
+    const targetGlb = (sessionStorage.getItem("last_glb_url") || "http://127.0.0.1:8000/assets/reconstructed_asset.glb") + "?v=" + Date.now();
+
+    gltfLoader.load(
+      targetGlb,
+      (gltf) => {
+        activeMesh = gltf.scene;
+        scene.add(activeMesh);
+        fitModelToCenter(activeMesh);
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => loadingOverlay.remove(), 250);
+      },
+      (xhr) => {
+        if (xhr.total > 0) {
+          loadingText.textContent = `Streaming mesh: ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
+        }
+      },
+      (error) => {
+        console.warn("GLB load failed, trying OBJ fallback...", error);
+        loadObjFallback();
+      }
+    );
+
+    function loadObjFallback() {
+      const objLoader = new THREE.OBJLoader();
+      const targetObj = (sessionStorage.getItem("last_obj_url") || "http://127.0.0.1:8000/assets/reconstructed_asset.obj") + "?v=" + Date.now();
+      objLoader.load(
+        targetObj,
+        (obj) => {
+          activeMesh = obj;
+          scene.add(activeMesh);
+          fitModelToCenter(activeMesh);
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => loadingOverlay.remove(), 250);
+        },
+        undefined,
+        (err) => {
+          loadingText.textContent = "Error: Could not locate 3D mesh assets.";
+          console.error(err);
+        }
+      );
+    }
+
+    document.getElementById('toggle-wireframe').addEventListener('click', () => {
+      isWireframe = !isWireframe;
+      if (activeMesh) {
+        activeMesh.traverse((child) => {
+          if (child.isMesh && child.material) child.material.wireframe = isWireframe;
+        });
+      }
+    });
+
+    document.getElementById('toggle-autorotate').addEventListener('click', (e) => {
+      controls.autoRotate = !controls.autoRotate;
+      e.target.textContent = controls.autoRotate ? "Pause Rotation" : "Resume Rotation";
+    });
+
+    document.getElementById('reset-cam').addEventListener('click', () => {
+      camera.position.set(0, 0.4, 2.2);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
