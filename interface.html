@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sketch2Shape</title>
+  <link rel="stylesheet" href="design1.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar" aria-label="Main navigation">
+      <a class="brand" href="#" aria-label="Sketch2Shape home">Sketch<span>2</span>Shape</a>
+    </nav>
+  </header>
+  <main>
+    <section class="actions" aria-label="Choose how to get started">
+      <button class="action-button" id="create-button" type="button">CREATE</button>
+      <input class="upload-input" id="image-upload" type="file" accept="image/*">
+      <label class="action-button upload-button" for="image-upload">UPLOAD</label>
+    </section>
+    <section class="history-section" id="gallery" aria-labelledby="history-title">
+      <header class="history-header">
+        <div>
+          <h2 id="history-title">Saved drawings</h2>
+          <p>Your submitted sketches are saved in this browser.</p>
+        </div>
+        <p id="history-message" role="status" aria-live="polite">Loading saved drawings...</p>
+      </header>
+      <div class="history-grid" id="history-grid"></div>
+    </section>
+    <section class="history-section uploads-section" id="uploaded-files" aria-labelledby="uploads-title">
+      <header class="history-header">
+        <div>
+          <h2 id="uploads-title">Uploaded files</h2>
+          <p>Processed images are saved in this browser and ready to download.</p>
+        </div>
+        <p id="uploads-message" role="status" aria-live="polite">No uploaded files yet.</p>
+      </header>
+      <div class="history-grid" id="uploads-grid"></div>
+    </section>
+  </main>
+  <dialog class="processing-dialog" id="processing-dialog" aria-labelledby="processing-title">
+    <div class="processing-layout">
+      <header class="processing-header">
+        <div>
+          <h1 id="processing-title">Prepare your image</h1>
+          <p>Adjust the preview, then save the processed PNG to your browser.</p>
+        </div>
+        <button class="editor-button" id="close-processing" type="button">Close</button>
+      </header>
+      <div class="processing-content">
+        <section class="processing-preview-section" aria-label="Processed image preview">
+          <div class="processing-preview-wrap">
+            <canvas id="processing-preview" aria-label="Processed image preview"></canvas>
+          </div>
+          <p id="processing-preview-info" role="status" aria-live="polite"></p>
+        </section>
+        <section class="processing-controls" aria-label="Image processing controls">
+          <fieldset class="resize-controls">
+            <legend>Resize</legend>
+            <label>
+              Width (px)
+              <input id="resize-width" type="number" min="1" max="8192" inputmode="numeric">
+            </label>
+            <label>
+              Height (px)
+              <input id="resize-height" type="number" min="1" max="8192" inputmode="numeric">
+            </label>
+            <label class="processing-checkbox">
+              <input id="keep-aspect-ratio" type="checkbox" checked>
+              Keep aspect ratio
+            </label>
+          </fieldset>
+          <label class="processing-slider" for="image-contrast">
+            <span>Contrast <output id="image-contrast-value" for="image-contrast">100%</output></span>
+            <input id="image-contrast" type="range" min="50" max="200" value="100">
+          </label>
+          <label class="processing-slider" for="noise-reduction">
+            <span>Noise reduction <output id="noise-reduction-value" for="noise-reduction">Off</output></span>
+            <input id="noise-reduction" type="range" min="0" max="3" step="0.5" value="0">
+            <small>Higher smoothing can soften fine details.</small>
+          </label>
+          <fieldset class="background-controls">
+            <legend>Background handling</legend>
+            <label class="processing-checkbox">
+              <input id="remove-light-background" type="checkbox">
+              Remove light background (transparent)
+            </label>
+            <label class="processing-slider" id="background-threshold-control" for="background-threshold" hidden>
+              <span>Lightness threshold <output id="background-threshold-value" for="background-threshold">240</output></span>
+              <input id="background-threshold" type="range" min="180" max="255" value="240">
+            </label>
+          </fieldset>
+          <p id="processing-status" role="status" aria-live="polite"></p>
+        </section>
+      </div>
+      <footer class="processing-footer">
+        <button class="editor-button" id="cancel-processing" type="button">Cancel</button>
+        <button class="editor-button submit-button" id="save-processed-image" type="button">Save to browser</button>
+      </footer>
+    </div>
+  </dialog>
+  <dialog class="editor-dialog" id="editor-dialog" aria-labelledby="editor-title">
+    <div class="editor-layout">
+      <header class="editor-header">
+        <div>
+          <h1 id="editor-title">Create your sketch</h1>
+          <p>Draw in the canvas, then submit to save it as a PNG.</p>
+        </div>
+        <button class="editor-button" id="close-editor" type="button">Close</button>
+      </header>
+      <div class="editor-canvas-wrap">
+        <canvas id="drawing-canvas" aria-label="Drawing canvas"></canvas>
+        <span class="brush-cursor" id="brush-cursor" aria-hidden="true"></span>
+      </div>
+      <footer class="editor-footer">
+        <span id="save-status" role="status" aria-live="polite"></span>
+        <button class="editor-button" id="eraser-tool" type="button" aria-pressed="false">Eraser</button>
+        <label class="eraser-size-control" for="brush-size">
+          Brush size
+          <input id="brush-size" type="range" min="1" max="40" value="3">
+          <output id="brush-size-value" for="brush-size">3 px</output>
+        </label>
+        <label class="eraser-size-control" for="eraser-size">
+          Eraser size
+          <input id="eraser-size" type="range" min="8" max="80" value="28">
+          <output id="eraser-size-value" for="eraser-size">28 px</output>
+        </label>
+        <button class="editor-button" id="erase-button" type="button">Reset</button>
+        <button class="editor-button submit-button" id="submit-drawing" type="button">Submit</button>
+      </footer>
+    </div>
+  </dialog>
+  <script src="brain_for_create.js" defer></script>
+</body>
+</html>
