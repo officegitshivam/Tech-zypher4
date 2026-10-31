@@ -237,7 +237,7 @@ python -c "import torch; print('CUDA Available:', torch.cuda.is_available(), '| 
 
 ## 🚀 Running the Application
 
-### Method 1: FastAPI + Live Server (Recommended)
+### Method 1: FastAPI + (Ctrl + F5) (Recommended)
 
 1. **Start the API Server:**
    ```powershell
@@ -246,7 +246,7 @@ python -c "import torch; print('CUDA Available:', torch.cuda.is_available(), '| 
    *The server starts at `http://127.0.0.1:8000`. Keep this PowerShell window open.*
 
 2. **Serve the Frontend:**
-   - In **VS Code**, right-click `interface.html` and choose **Open with Live Server**.
+   - In **VS Code**, right-click `interface.html` and press **Ctrl + F5**.
    - Alternatively, start a local Python HTTP server in a second terminal:
      ```powershell
      python -m http.server 5500
@@ -328,6 +328,7 @@ Tech-zypher4/
 - **Resolution vs. Memory Trade-Off:** Mesh reconstruction resolution is set to `128` to maintain compatibility with 6 GB VRAM GPUs. While this ensures stable execution without OOM crashes, fine structural details can appear soft.
 - **Vertex Colors vs. UV Texture Atlases:** TripoSR assigns color data directly to mesh vertices rather than generating UV texture unwraps. Complex materials with microscopic detail require higher polygon densities.
 - **Generation Latency:** The 2-minute processing time is primarily dominated by the 25-step diffusion stage under CPU offload constraints. On systems with 12+ GB VRAM, disabling offloading drops execution time to under 25 seconds.
+- **Live Server Issue**: Live server often serves the project from a sub-folder path or appends query params. Constructing a url or navigating directly while the modal/form event is firing triggers Live Server’s reload listener before browser finishes navigation.
 
 ---
 
@@ -345,6 +346,8 @@ Tech-zypher4/
 ### Q4: CORS errors when accessing assets
 **Solution:** The FastAPI backend in `server.py` includes `CORSMiddleware` configured with `allow_origins=["*"]`. Ensure requests are routed through `http://127.0.0.1:8000`.
 
+### Q5: Live server issue
+**Solution:** except of starting the program via live server , the alternative used is hard rest by going to interface.html when the server.py is online and then pressing Ctrl + F5
 ---
 
 ## 🔮 Future Scope
