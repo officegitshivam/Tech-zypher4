@@ -243,7 +243,7 @@ The entire system was developed, benchmarked, and stress-tested on an entry-leve
 
 ```powershell
 # Open Windows PowerShell as Administrator or standard developer mode
-git clone https://github.com/siddhartha420/Sketch2Shape.git
+git clone https://github.com/officegitshivam/Sketch2Shape.git
 cd Sketch2Shape
 
 # Create Python 3.10.11 virtual environment
