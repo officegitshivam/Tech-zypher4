@@ -1,0 +1,52 @@
+# ========================================================
+# Core Web API & Application Server
+# ========================================================
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+pydantic==2.6.4
+starlette==0.36.3
+gradio==4.26.0
+
+# ========================================================
+# PyTorch Ecosystem (CUDA 12.1 / 11.8 compatible)
+# Note: Install via PyTorch wheel index if wheels aren't found
+# ========================================================
+torch==2.2.2
+torchvision==0.17.2
+torchaudio==2.2.2
+
+# ========================================================
+# Hugging Face Generative AI & Diffusion
+# ========================================================
+diffusers==0.27.2
+transformers==4.39.3
+accelerate==0.28.0
+huggingface-hub==0.22.2
+safetensors==0.4.2
+
+# ========================================================
+# Vision, Segmentation & Contour Extraction
+# ========================================================
+opencv-python-headless==4.9.0.80
+pillow==10.3.0
+numpy==1.26.4
+rembg[cli]==2.0.56
+onnxruntime-gpu==1.17.1
+
+# ========================================================
+# Isosurface Extraction & Geometry Repair
+# (skimage.measure bypasses torchmcubes C++ build failures)
+# ========================================================
+scikit-image==0.22.0
+scipy==1.12.0
+trimesh==4.3.2
+
+# ========================================================
+# Configuration & Utilities
+# ========================================================
+pyyaml==6.0.1
+tqdm==4.66.2
+requests==2.31.0
+filelock==3.13.4
+packaging==24.0
