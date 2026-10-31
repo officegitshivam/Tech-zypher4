@@ -5,7 +5,7 @@ One-line tagline that explains what your project does
 
 Show Image Show Image Show Image Show Image Show Image
 
-Team TEAM_NAME · Built for the ML Hackathon, Zyphr4 @ IIT Bhubaneswar
+Team TEAM_BYRTEFORCE · Built for the ML Hackathon, Zyphr4 @ IIT Bhubaneswar
 
 Demo · Features · Setup · Results · Team
 
