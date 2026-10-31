@@ -185,12 +185,12 @@ The entire system was developed and benchmarked on consumer-tier laptop hardware
 
 | Stage | Operation | Runtime | Peak Resource Usage |
 | :--- | :--- | :--- | :--- |
-| **Stage 1** | Contour Extraction & Denoising | ~1.2 s | < 250 MB RAM |
-| **Stage 2** | ControlNet + SD v1.5 Diffusion (25 steps) | ~85 s | ~4.8 GB VRAM (CPU Offload) |
-| **Stage 3** | Rembg Foreground Isolation | ~6.5 s | ~1.2 GB RAM |
-| **Stage 4** | TripoSR 3D Mesh Reconstruction | ~4.5 s | ~3.8 GB VRAM |
-| **Stage 5** | Trimesh Repair, Validation & Export | ~2.5 s | ~450 MB RAM |
-| **Total** | **End-to-End Pipeline Execution** | **~100–120 s** | **< 5.2 GB Peak VRAM** |
+| **Stage 1** | Contour Extraction & Denoising | ~0.8 s | < 250 MB RAM |
+| **Stage 2** | ControlNet + SD v1.5 Diffusion (25 steps) | ~150 s | ~4.8 GB VRAM (CPU Offload) |
+| **Stage 3** | Rembg Foreground Isolation | ~4.5 s | ~1.2 GB RAM |
+| **Stage 4** | TripoSR 3D Mesh Reconstruction | ~20 s | ~3.8 GB VRAM |
+| **Stage 5** | Trimesh Repair, Validation & Export | ~1.5 s | ~450 MB RAM |
+| **Total** | **End-to-End Pipeline Execution** | **~180 s** | **< 5.2 GB Peak VRAM** |
 
 ---
 
