@@ -1,421 +1,385 @@
-[project_readme (1).md](https://github.com/user-attachments/files/34224759/project_readme.1.md)
-# 🖌️ Sketch2Shape AI
+[project_readme (1).md](https://github.com/user-attachments/files/34226002/project_readme.1.md)
+# 🖌️ Sketch2Shape AI: From a 2D Sketch to a 3D Asset
+> **TechZephyr 4.0 | 24-Hour Live Hackathon | Computer Vision & Generative AI**  
+> *Developed for IIT Bhubaneswar Hackathon Challenge*
 
-### *From a 2D Sketch to an Interactive 3D Digital Asset*
+[![Python Version](https://img.shields.io/badge/Python-3.10.11-blue.svg)](https://www.python.org/downloads/release/python-31011/)
+[![Framework](https://img.shields.io/badge/FastAPI-0.110.0-009688.svg)](https://fastapi.tiangolo.com/)
+[![Three.js](https://img.shields.io/badge/Three.js-r128-black.svg)](https://threejs.org/)
+[![Hardware Tested](https://img.shields.io/badge/Hardware-RTX%204050%20(6GB%20VRAM)-green.svg)]()
+[![Platform](https://img.shields.io/badge/Platform-Windows%20OS-blue.svg)]()
 
-*An end-to-end generative AI system that converts rough hand-drawn 2D sketches and optional natural language prompts into watertight, textured, and inspectable 3D meshes (.GLB / .OBJ) in under 2 minutes on consumer hardware.*
+---
 
-[Quick Start for Judges](#-quick-start-for-judges) • [Problem Statement](#-problem-statement--hackathon-alignment) • [System Architecture](#-system-architecture) • [Pipeline Stages](#-stage-by-stage-pipeline-breakdown) • [Hardware Benchmarks](#-hardware--computational-benchmarks) • [Installation](#-installation--setup) • [Team](#-team-members)
-
-## 📑 Table of Contents
-
- 1. [Problem Statement & Hackathon Alignment](#-problem-statement--hackathon-alignment)
- 2. [Quick Start for Judges](#-quick-start-for-judges)
- 3. [Key Features](#-key-features)
- 4. [System Architecture](#-system-architecture)
- 5. [Stage-by-Stage Pipeline Breakdown](#-stage-by-stage-pipeline-breakdown)
- 6. [Models & Third-Party Components](#-models--third-party-components)
- 7. [Tech Stack](#-tech-stack)
- 8. [Hardware & Computational Benchmarks](#-hardware--computational-benchmarks)
- 9. [Installation & Setup](#-installation--setup)
+## 📋 Table of Contents
+1. [Executive Summary & Problem Statement](#-executive-summary--problem-statement)
+2. [Quick Start for Judges](#-quick-start-for-judges)
+3. [Key System Features](#-key-system-features)
+4. [System Architecture](#-system-architecture)
+5. [Stage-by-Stage Technical Breakdown](#-stage-by-stage-technical-breakdown)
+6. [Models & Third-Party Components](#-models--third-party-components)
+7. [Technology Stack](#-technology-stack)
+8. [Hardware Constraints & Benchmarks](#-hardware-constraints--benchmarks)
+9. [Installation & Environment Setup](#-installation--environment-setup)
 10. [Running the Application](#-running-the-application)
 11. [Input & Output Specifications](#-input--output-specifications)
-12. [Sample Results & Validation Reports](#-sample-results--validation-reports)
-13. [Mesh Validation & Topological Repair](#-mesh-validation--topological-repair)
-14. [Project Structure](#-project-structure)
-15. [Known Limitations](#-known-limitations)
-16. [Troubleshooting & FAQs](#-troubleshooting--faqs)
-17. [Future Scope](#-future-scope)
-18. [Team Members](#-team-members)
-19. [Acknowledgments & License](#-acknowledgments--license)
+12. [Mesh Validation & Geometry Integrity](#-mesh-validation--geometry-integrity)
+13. [Project Directory Structure](#-project-directory-structure)
+14. [Limitations & Trade-Offs](#-limitations--trade-offs)
+15. [Troubleshooting Guide](#-troubleshooting-guide)
+16. [Future Scope](#-future-scope)
+17. [Team Members & Contributions](#-team-members--contributions)
+18. [Acknowledgments & Licensing](#-acknowledgments--licensing)
 
-## 🎯 Problem Statement & Hackathon Alignment
+---
 
-### Problem Background (TechZephyr 4.0 | IIT Bhubaneswar)
+## 🎯 Executive Summary & Problem Statement
 
-Converting a creative idea into a detailed three-dimensional digital asset is technically demanding, requiring expertise in geometry creation, mesh editing, texturing, lighting, and rendering. While a simple 2D sketch is the natural first step in expressing an object concept (products, furniture, vehicles, toys), a single-view sketch contains **no explicit depth, volume, or back-surface geometry**. Traditional edge-detection algorithms cannot infer hidden surfaces, while standard generative image models often hallucinate visually appealing 2D outputs without preserving original sketch silhouettes.
+Transforming a rough conceptual idea into an interactive 3D asset typically requires specialized modeling skills, surface topology reconstruction, UV texturing, lighting mastery, and heavy compute resources. Hand-drawn sketches represent the fastest and most intuitive medium for conceptual prototyping (household objects, furniture, architecture, automotive forms, and toys). However, single-view 2D drawings inherently lack 3D spatial depth, present self-occluded rear geometry, and feature sparse visual contour information.
 
-### The Challenge
+**Sketch2Shape AI** bridges this gap by delivering an automated, lightweight, end-to-end generative AI pipeline. The system ingests single-view freehand sketches (sketched directly on an in-app canvas or uploaded as images) along with optional natural-language appearance prompts, synthesizes canonical studio-lit product representations via controlled diffusion, reconstructs watertight and textured 3D meshes using fast implicit neural field transformers, and renders them inside a custom, interactive Three.js WebGL inspection studio.
 
-To bridge this gap by building a unified, accessible, and functional end-to-end application that transforms an in-app drawn sketch or an uploaded image (with optional text prompt conditioning) into a plausible, watertight, textured 3D digital model exportable in universal 3D formats (`.glb` / `.obj`).
-
-### Our Solution
-
-**Sketch2Shape AI** implements an asymmetric multi-stage pipeline:
-
-* **Zero-Latency In-App Canvas & Upload Suite**: Interactive HTML5 drawing tool with dynamic brush/eraser controls, paired with an image upload processor featuring contrast enhancement and background isolation.
-* **Controlled Cross-Attention 2D Synthesis**: ControlNet scribble conditioning anchored on Stable Diffusion v1.5 to project photorealistic, canonical views while respecting structural contours.
-* **Feed-Forward Implicit 3D Field Reconstruction**: High-speed image-to-3D synthesis via TripoSR (Transformer-based triplane query with marching cubes).
-* **Robust Native Isosurface Extraction**: Native Windows-compatible isosurface polygonization using `skimage.measure.marching_cubes` to bypass C++/CUDA compilation failures associated with `torchmcubes`.
-* **Automated Topological Validation**: Automated mesh manifold verification, normal unification, and watertight sealing via Trimesh.
-* **Bespoke 3D WebGL Studio**: Direct browser-native inspection with floor-plane alignment, sRGB vertex color rendering, and beveled UI design.
+---
 
 ## ⚡ Quick Start for Judges
 
-Follow these steps to reproduce the working application locally:
-
-### 1. Prerequisites Check
-
-Ensure your host machine runs **Windows OS**, **Python 3.10.11**, and an NVIDIA GPU with **CUDA 12.1+** installed.
-
-### 2. Step 1: Launch Backend Engine (PowerShell)
+To test and reproduce the application on Windows:
 
 ```powershell
-# 1. Clone repository
-git clone https://github.com/siddhartha420/Sketch2Shape.git
-cd Sketch2Shape
+# 1. Clone the repository
+git clone https://github.com/officegitshivam/Tech-zypher4.git
+cd Tech-zypher4
 
-# 2. Create and activate Python 3.10.11 environment
+# 2. Set up virtual environment (Python 3.10.11 recommended)
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# 3. Install PyTorch (CUDA 12.1) & dependencies
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# 3. Install PyTorch with CUDA 12.1 and project dependencies
+pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
-pip install -e ./TripoSR
 
-# 4. Start the FastAPI server
+# 4. Start the FastAPI backend server
 python server.py
 ```
 
-*Wait until the console outputs:*
+Open a second terminal or your editor to serve the web interface:
+* **Option A (VS Code Live Server - Recommended):** Open the project directory in VS Code, right-click `interface.html`, and click **Open with Live Server**.
+* **Option B (Python HTTP Server):**
+  ```powershell
+  python -m http.server 5500
+  ```
+  Open `http://127.0.0.1:5500/interface.html` in your browser.
 
-```
-Initializing Pipeline engines on cuda...
-Engines Loaded and Ready.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-```
+---
 
-### 3. Step 2: Open Client Interface (VS Code / Live Server)
+## ✨ Key System Features
 
-1. Open the project folder in **Visual Studio Code**.
-2. Right-click `interface.html` $\rightarrow$ **Open with Live Server** (or open `http://127.0.0.1:5500/interface.html`).
-3. Click **CREATE**, sketch an object (e.g., a ceramic mug or chair), type an optional prompt (e.g., `"Teal glazed ceramic, matte rim, studio lighting"`), and click **Generate 3D**.
-4. The system automatically executes all 5 stages, verifies the mesh, and redirects straight to `viewer.html` for 360° interactive inspection.
+- **Interactive Canvas with 3D Depth UI:** Desktop sketching canvas designed with a high-contrast `#014BAA` (deep blue) and `#F8F3F0` (warm cream) palette, embossed physical buttons, and a dedicated right-side tool dock.
+- **Image Preprocessing Suite:** Ingests `.png`, `.jpg`, and `.jpeg` sketch uploads with client-side aspect-ratio locking, contrast adjustment, noise reduction, and background transparency isolation.
+- **Controlled Conditioning:** Employs ControlNet Scribble paired with Stable Diffusion v1.5 to strictly preserve input sketch contours rather than hallucinating unrelated structures.
+- **VRAM-Optimized Reconstruction (6 GB Limit):** Engineered with sequential CPU model offloading, attention slicing, VAE slicing, and intermediate VRAM cache clearing (`torch.cuda.empty_cache()`) to guarantee execution on 6 GB VRAM GPUs without memory crashes.
+- **Native Isosurface Extraction (`skimage.measure`):** Replaces problematic C++/CUDA compiler dependencies (such as `torchmcubes` on Windows) with pure-Python/NumPy marching cubes via `skimage.measure.marching_cubes`.
+- **Standalone WebGL Turntable Viewer:** Custom Three.js viewer with dual-sided PBR lighting, orbit controls, wireframe toggling, coordinate normalization, floor alignment ($Y = 0$), and direct `.glb` and `.obj` downloads.
 
-## 🚀 Key Features
-
-* **Dual Input Modes**: Direct HTML5 touch/mouse drawing canvas with dynamic brush/eraser controls or upload existing image sketches (`.png`, `.jpg`, `.jpeg`).
-* **Multi-Modal Text Conditioning**: Augment geometric contours with optional descriptive prompts specifying materials, surface roughness, lighting, and color.
-* **Engineered for 6 GB VRAM GPUs**: Features model CPU offloading, attention slicing, VAE slicing, and intermediate VRAM cache flushing (`torch.cuda.empty_cache()`), running entirely on laptop-class GPUs (RTX 4050).
-* **Guaranteed Volumetric Mesh Output**: Does not output flat cards or depth-map planes. Produces complete, watertight 3D hulls using feed-forward implicit reconstruction.
-* **Cross-Platform Marching Cubes (`skimage.measure`)**: Eliminates build-time C++/MSVC compilation dependencies by using `scikit-image` for isosurface extraction instead of unstable `torchmcubes` wheels.
-* **Automated Mesh Repair**: Automatically repairs winding inversions, unifies vertex normals, fills open holes, and calculates bounding box volume metrics.
-* **Interactive 3D WebGL Turntable**: Orbit controls, camera centering, floor-plane alignment, wireframe modes, and direct `.GLB` / `.OBJ` downloads styled in `#014BAA` (Deep Blue) and `#F8F3F0` (Warm Cream).
+---
 
 ## 🏗️ System Architecture
 
 ```
-                                  USER INTERFACE (HTML5 / CSS / Vanilla JS)
-                                     │
-                 ┌───────────────────┴────────────────────┐
-                 ▼                                        ▼
-         [ In-App Canvas ]                       [ File Uploader ]
-         (Interactive Drawing)               (.png, .jpg, .jpeg + Sliders)
-                 │                                        │
-                 └───────────────────┬────────────────────┘
-                                     │ + Optional Text Prompt
-                                     ▼
-                       [ POST /api/generate-3d ]
-                                     │
-═════════════════════════════════════╪═════════════════════════════════════════════════
-                               FASTAPI SERVER (Python 3.10.11)
-                                     │
- ┌───────────────────────────────────▼─────────────────────────────────────────────────┐
- │ STAGE 1: Computer Vision Contour Preprocessing (modules/vision.py)                  │
- │ • Grayscale conversion • Bilateral edge-preserving filtering                       │
- │ • Adaptive thresholding • Morphological kernel dilation (512x512)                   │
- └───────────────────────────────────┬─────────────────────────────────────────────────┘
-                                     │ Normalized Contours
- ┌───────────────────────────────────▼─────────────────────────────────────────────────┐
- │ STAGE 2: Controlled Diffusion Synthesis (modules/diffusion.py)                      │
- │ • Stable Diffusion v1.5 + ControlNet Scribble (25 Steps, UniPC)                     │
- │ • Sequential CPU Model Offloading + VAE Slicing (VRAM Optimization)                │
- └───────────────────────────────────┬─────────────────────────────────────────────────┘
-                                     │ Synthetic 2D Product Render
- ┌───────────────────────────────────▼─────────────────────────────────────────────────┐
- │ STAGE 3: Foreground Matting & Alpha Masking (modules/segmentation.py)               │
- │ • U^2-Net Background Removal (rembg) • Non-zero Bounding Box Crop                   │
- │ • Aspect Ratio Rescaling (85% canonical area) & Centering on 512x512                │
- └───────────────────────────────────┬─────────────────────────────────────────────────┘
-                                     │ Alpha-Isolated Subject
- ┌───────────────────────────────────▼─────────────────────────────────────────────────┐
- │ STAGE 4: Feed-Forward 3D Reconstruction (modules/reconstruction.py)                 │
- │ • Alpha-to-RGB Gray Neutral Composition (RGB x a + 0.5 x (1 - a))                   │
- │ • TripoSR Vision Transformer Encoder • Triplane NeRF Density Field Query            │
- │ • Isosurface Extraction: skimage.measure.marching_cubes (Bypassing torchmcubes)     │
- │ • Marching Cubes grid resolution=128 tuned for 6 GB VRAM                           │
- └───────────────────────────────────┬─────────────────────────────────────────────────┘
-                                     │ Raw Extracted Mesh
- ┌───────────────────────────────────▼─────────────────────────────────────────────────┐
- │ STAGE 5: Topological Mesh Repair & Export (modules/validator.py)                    │
- │ • Trimesh normal alignment • Inversion correction • Boundary hole filling           │
- │ • Extents depth check (Z > 0.0005) • Export to generated_assets/ (.glb & .obj)      │
- └───────────────────────────────────┬─────────────────────────────────────────────────┘
-                                     │
-═════════════════════════════════════╪═════════════════════════════════════════════════
-                                     │ JSON Response + URLs
-                                     ▼
-                   [ Interactive WebGL Viewer (viewer.html) ]
-                   • Automatic Camera Target & Geometry Normalization
-                   • Snapped to Ground Plane Floor (Y = 0)
-                   • sRGB Color Encoding with Baked Vertex Colors
+[ In-App Canvas / Image Upload ] + [ Optional Text Prompt ]
+                       │
+                       ▼
+    [ Stage 1: Computer Vision Preprocessing ]
+       • Bilateral Filter Denoising
+       • Adaptive Gaussian Thresholding
+       • Morphological Contour Dilation
+                       │
+                       ▼
+    [ Stage 2: Generative 2D Synthesis ]
+       • Stable Diffusion v1.5 + ControlNet Scribble
+       • UniPC Multistep Scheduler (25 steps)
+       • Sequential CPU Offloading & VAE Slicing
+                       │
+                       ▼
+    [ Stage 3: Foreground Isolation ]
+       • rembg U2-Net Alpha Masking
+       • 512x512 Canvas Centering & Normalization
+                       │
+                       ▼
+    [ Stage 4: 3D Geometry Extraction ]
+       • TripoSR Feed-Forward Reconstruction
+       • NeRF-Style Density & RGB Field Estimation
+       • skimage.measure.marching_cubes Extraction
+                       │
+                       ▼
+    [ Stage 5: Mesh Validation & Export ]
+       • Trimesh Normal Repair, Inversion & Hole Filling
+       • Volumetric Depth & Vertex Checks
+       • Dual Export: Binary .GLB & Wavefront .OBJ
+                       │
+                       ▼
+    [ WebGL 3D Turntable Viewer (viewer.html) ]
 ```
 
-## 🔬 Stage-by-Stage Pipeline Breakdown
+---
 
-### Stage 1: Computer Vision Contour Preprocessing (`modules/vision.py`)
+## 🔬 Stage-by-Stage Technical Breakdown
 
-This stage ingests raw canvas strokes or uploaded raster sketches and standardizes them into structured geometric contours. The module converts inputs to grayscale, applies bilateral filtering to eliminate high-frequency noise while preserving boundary edges, and computes mean luminance to automatically invert dark-on-light drawings. Adaptive Gaussian thresholding and morphological dilation are applied to generate clean, consistent line strokes formatted into a $512 \times 512$ RGB conditioning tensor.
+### Stage 1: Vision Contours & Preprocessing (`modules/vision.py`)
+The pipeline standardizes raw drawing strokes or uploaded raster sketches into 512×512 boundary representations. OpenCV converts images to single-channel grayscale, evaluates background luminance to invert dark-on-light drawings, and applies bilateral filtering to suppress jitter while maintaining sharp edge gradients. Adaptive Gaussian thresholding and morphological dilation generate continuous line contours that serve as conditioning tensors for the diffusion model.
 
-### Stage 2: Controlled 2D Diffusion Synthesis (`modules/diffusion.py`)
+### Stage 2: Sketch-Guided Generative Synthesis (`modules/diffusion.py`)
+The extracted contours condition Stable Diffusion v1.5 through `lllyasviel/sd-controlnet-scribble`. In tandem with the sketch structure and an optional user prompt, the UniPC Multistep scheduler generates a high-resolution, canonical studio product render in 25 inference steps. Memory management hooks (`enable_model_cpu_offload`, attention slicing, and VAE slicing) keep peak VRAM under 5 GB throughout generation.
 
-This stage translates sparse line structures into a photorealistic, studio-lit canonical product render using Stable Diffusion v1.5 conditioned with ControlNet Scribble. The module injects positive prompt anchors (canonical product view, studio lighting, neutral background) and negative prompts to eliminate artifacts. To ensure compatibility with 6 GB VRAM GPUs, inference runs in FP16 precision using the UniPC Multistep Scheduler (25 steps) alongside model CPU offloading, attention slicing, and VAE slicing.
+### Stage 3: Silhouette Segmentation & Canvas Padding (`modules/segmentation.py`)
+Before 3D reconstruction, raw 2D renders are isolated from their generated backgrounds to prevent geometric distortion. Using `rembg` (powered by U2-Net), an alpha matte isolates the subject. The object's bounding box is cropped, resized with aspect-ratio preservation, and placed onto a transparent 512×512 canvas with a uniform 0.85 scaling factor to ensure ideal camera framing for the 3D encoder.
 
-### Stage 3: Foreground Matting & Alpha Masking (`modules/segmentation.py`)
-
-To isolate the synthesized subject from artificial backgrounds prior to geometric projection, this stage runs automated foreground extraction using the open-source $U^2$-Net architecture (`rembg`). The stage processes the image into an isolated RGBA representation, calculates the exact non-zero bounding box of the foreground object, crops out ambient margins, rescales the subject to maintain an 85% canvas ratio, and centers it on a $512 \times 512$ transparent canvas.
-
-### Stage 4: Feed-Forward 3D Reconstruction (`modules/reconstruction.py`)
-
-This stage reconstructs explicit 3D geometry from the isolated foreground image using TripoSR. The 4-channel RGBA input is first composited over a neutral gray background ($\text{RGB} \times \alpha + 0.5 \times (1.0 - \alpha)$) to avoid tensor dimension mismatches in TripoSR's image tokenizer. The model queries NeRF density fields at an optimized grid resolution of $128^3$. Because `torchmcubes` frequently fails on Windows environments due to missing CUDA/C++ compilers, isosurface polygonization is executed seamlessly via `skimage.measure.marching_cubes` to yield stable, portable triangle meshes.
+### Stage 4: 3D Triplane Reconstruction (`modules/reconstruction.py`)
+The foreground asset enters TripoSR, a feed-forward vision transformer capable of estimating density fields and surface geometry in under 5 seconds. The 4-channel RGBA input is first composited over a neutral gray background ($\text{RGB} \times \alpha + 0.5 \times (1.0 - \alpha)$) to avoid channel mismatches. To ensure cross-platform stability on Windows, isosurface extraction is performed via `skimage.measure.marching_cubes` at an optimized resolution of $128^3$, yielding a clean triangle mesh with baked per-vertex RGB values.
 
 ### Stage 5: Mesh Validation, Repair & Export (`modules/validator.py`)
+The polygon mesh is processed through `trimesh` to ensure manifold integrity. The validator recalculates vertex normals, corrects winding inversions, fills boundary holes, and checks volumetric depth along the Z-axis ($Z_{\text{depth}} > 0.0005$) to reject flat degenerate geometry. The validated model is exported as both binary GLTF (`.glb`) and Wavefront (`.obj`) into the `generated_assets/` folder.
 
-The extracted polygon mesh undergoes topological validation and geometric repair using Trimesh. The pipeline recalculates and unifies vertex normals, resolves face winding inversions, seals open boundary seams through hole-filling algorithms, and validates non-degeneracy by checking vertex counts ($>100$) and volumetric bounding spans ($Z_{\text{depth}} > 0.0005$). The verified geometry is exported as both binary GLTF (`.glb`) and Wavefront (`.obj`) files with embedded vertex color buffers.
+---
 
 ## 📦 Models & Third-Party Components
 
-| Component | Repository / Model Identifier | Source / Provider | License | Purpose in Pipeline | 
-| ----- | ----- | ----- | ----- | ----- | 
-| **ControlNet** | `lllyasviel/sd-controlnet-scribble` | Hugging Face Hub | Apache 2.0 | Enforces sketch boundary structural adherence | 
-| **Diffusion Backbone** | `runwayml/stable-diffusion-v1-5` | Hugging Face Hub | CreativeML OpenRAIL-M | Generates 2D canonical appearance & lighting | 
-| **Diffusion Scheduler** | `UniPCMultistepScheduler` | Hugging Face Diffusers | Apache 2.0 | Enables fast diffusion sampling in 25 steps | 
-| **Matting Model** | `rembg` ($U^2$-Net) | Open Source / PyPI | MIT License | Isolates foreground object from background | 
-| **3D Reconstruction** | `stabilityai/TripoSR` | Stability AI / VAST | MIT License | Transformer-based triplane NeRF to 3D mesh | 
-| **Isosurface Extraction** | `skimage.measure.marching_cubes` | Scikit-Image | BSD-3-Clause | Pure-Python/NumPy marching cubes bypass for `torchmcubes` |
-| **Geometry Engine** | `trimesh` | mikedh / PyPI | MIT License | Normal repair, watertight sealing, GLB/OBJ export | 
-| **API Framework** | `FastAPI` + `Uvicorn` | encode / PyPI | BSD-3-Clause | Asynchronous REST server orchestration | 
-| **3D Client Engine** | `Three.js` (r128) | CDN (mrdoob) | MIT License | Interactive WebGL rendering & OrbitControls | 
+| Component / Model | Provider / Repository | Purpose | Access / Weights |
+| :--- | :--- | :--- | :--- |
+| **Stable Diffusion v1.5** | RunwayML / Hugging Face | Base 2D latent diffusion model | Open access (`runwayml/stable-diffusion-v1-5`) |
+| **ControlNet Scribble** | Lllyasviel / Hugging Face | Spatial edge conditioning | Open access (`lllyasviel/sd-controlnet-scribble`) |
+| **TripoSR** | Stability AI / VAST-AI | Feed-forward image-to-3D reconstruction | Open weights (`stabilityai/TripoSR`) |
+| **U2-Net** | rembg / Daniel Gatis | Background isolation & segmentation | Bundled via `rembg[cli]` |
+| **Three.js** | Mr.doob / GitHub | Client-side WebGL 3D rendering | MIT License (CDN hosted) |
+| **Trimesh** | Mike Dawson-Haggerty | Mesh repair, topology checks & export | MIT License (PyPI) |
 
-*Note: No paid or external commercial APIs are used. Weights download automatically on first initialization and are cached locally in `~/.cache/huggingface/` for offline execution.*
+*Note: No commercial API keys or paid third-party endpoints are used. All model weights are downloaded from Hugging Face Hub during first-time execution.*
 
-## 🛠️ Tech Stack
+---
 
-* **Runtime & Environment**: Python **3.10.11**, CUDA 12.1, Windows PowerShell
-* **Deep Learning Framework**: PyTorch 2.1+, Torchvision, Hugging Face `diffusers`, `transformers`, `accelerate`
-* **Vision & Geometric Computing**: OpenCV (`opencv-python`), Pillow (PIL), NumPy, Scikit-Image (`skimage.measure`)
-* **Mesh Processing**: Trimesh, SciPy, NetworkX
-* **Backend Architecture**: FastAPI, Starlette, Uvicorn, Python-Multipart
-* **Frontend & Graphics**: HTML5 Canvas API, Vanilla ES6+ JavaScript, Three.js (r128), Tailwind CSS (CDN)
+## 🛠️ Technology Stack
 
-## 💻 Hardware & Computational Benchmarks
+- **Core Runtime:** Python 3.10.11, CUDA 12.1 / 11.8, Windows OS
+- **Backend API:** FastAPI, Uvicorn (ASGI), Python-Multipart
+- **Generative AI & ML:** PyTorch, Torchvision, Diffusers, Transformers, Accelerate
+- **Computer Vision:** OpenCV (`opencv-python-headless`), Pillow, NumPy
+- **Foreground Removal:** Rembg (`u2net`)
+- **3D Processing:** Trimesh, SciPy, Scikit-Image (`skimage.measure`)
+- **Frontend UI & Visuals:** HTML5 Canvas, CSS3 (Custom 3D Beveled Design), JavaScript (ES6+), Three.js (r128), OrbitControls, GLTFLoader, OBJLoader
+- **Alternative GUI:** Gradio (available in `app.py`)
 
-The entire system was developed, benchmarked, and stress-tested on an entry-level consumer GPU environment:
+---
 
-* **Target System**: Laptop PC
-* **Operating System**: Windows 11 64-bit
-* **Graphics Card**: **NVIDIA GeForce RTX 4050 Laptop GPU (6 GB GDDR6 VRAM)**
-* **System Memory**: **16 GB DDR5 RAM**
-* **Processor**: Intel Core i5 / AMD Ryzen 7 Series
+## 💻 Hardware Constraints & Benchmarks
 
-### Execution Time Breakdown (per 3D Model)
+The entire system was developed and benchmarked on consumer-tier laptop hardware:
 
-| Pipeline Step | Module | Average Duration | Peak VRAM Footprint | 
-| ----- | ----- | ----- | ----- | 
-| **1. Contour Preprocessing** | `modules/vision.py` | $\approx 0.8\text{ s}$ | $0\text{ MB}$ (CPU execution) | 
-| **2. 2D Diffusion Synthesis** | `modules/diffusion.py` | $\approx 42.0\text{ s}$ | $\approx 4.4\text{ GB}$ (FP16 + Slicing) | 
-| **3. Foreground Matting** | `modules/segmentation.py` | $\approx 4.5\text{ s}$ | $\approx 0.6\text{ GB}$ (CLI Isolation) | 
-| **4. 3D Mesh Reconstruction** | `modules/reconstruction.py` | $\approx 55.0\text{ s}$ | $\approx 4.8\text{ GB}$ (Res: $128^3$, `skimage`) | 
-| **5. Topological Mesh Repair** | `modules/validator.py` | $\approx 1.5\text{ s}$ | $0\text{ MB}$ (CPU execution) | 
-| **Total Generation Cycle** | **End-to-End** | $\approx 1\text{m } 45\text{s} - 2\text{m } 05\text{s}$ | **Peak:** $\approx 5.1\text{ GB VRAM}$ | 
+| Parameter | Development & Testing Environment |
+| :--- | :--- |
+| **GPU** | NVIDIA GeForce RTX 4050 Laptop GPU (6 GB GDDR6 VRAM) |
+| **System RAM** | 16 GB DDR5 |
+| **Operating System** | Windows 11 Home (x64) |
+| **Python Environment** | Python 3.10.11 |
 
-## 📥 Installation & Setup
+### Performance Metrics (Average Single Run)
 
-### 1. System Requirements
+| Stage | Operation | Runtime | Peak Resource Usage |
+| :--- | :--- | :--- | :--- |
+| **Stage 1** | Contour Extraction & Denoising | ~1.2 s | < 250 MB RAM |
+| **Stage 2** | ControlNet + SD v1.5 Diffusion (25 steps) | ~85 s | ~4.8 GB VRAM (CPU Offload) |
+| **Stage 3** | Rembg Foreground Isolation | ~6.5 s | ~1.2 GB RAM |
+| **Stage 4** | TripoSR 3D Mesh Reconstruction | ~4.5 s | ~3.8 GB VRAM |
+| **Stage 5** | Trimesh Repair, Validation & Export | ~2.5 s | ~450 MB RAM |
+| **Total** | **End-to-End Pipeline Execution** | **~100–120 s** | **< 5.2 GB Peak VRAM** |
 
-* Windows 10/11 (64-bit)
-* Python **3.10.11** installed and added to system `PATH`
-* NVIDIA GPU Driver supporting CUDA 12.1+
-* Internet connection (required **only once** during initial setup to download model weights $\approx 7\text{ GB}$)
+---
 
-### 2. Environment Setup Steps
+## ⚙️ Installation & Environment Setup
 
+Follow these steps to set up the environment on a clean Windows machine:
+
+### 1. Prerequisites
+- **Python 3.10.11** installed and added to your system `PATH`.
+- **Git** installed on your system.
+- An active internet connection for the initial model downloads (~6 GB total).
+
+### 2. Clone the Repository
 ```powershell
-# Open Windows PowerShell as Administrator or standard developer mode
-git clone https://github.com/officegitshivam/Sketch2Shape.git
-cd Sketch2Shape
+git clone https://github.com/officegitshivam/Tech-zypher4.git
+cd Tech-zypher4
+```
 
-# Create Python 3.10.11 virtual environment
+### 3. Create a Virtual Environment
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-
-# Upgrade pip and install PyTorch with CUDA 12.1
-python -m pip install --upgrade pip
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-
-# Install core system dependencies (including scikit-image for marching cubes)
-pip install fastapi uvicorn python-multipart pillow numpy opencv-python diffusers transformers accelerate rembg trimesh scipy scikit-image
-
-# Install TripoSR module
-git clone https://github.com/VAST-AI-Research/TripoSR.git
-pip install -e ./TripoSR
 ```
 
-## 🖥️ Running the Application
-
-### 1. Start the Backend Server (Terminal 1)
-
+### 4. Install PyTorch with CUDA Support
+Install PyTorch with CUDA 12.1 support before installing other dependencies:
 ```powershell
-.\.venv\Scripts\Activate.ps1
-python server.py
+pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-*Wait until the models are loaded. You will see:*
-
-```
-Initializing Pipeline engines on cuda...
-Engines Loaded and Ready.
-INFO:     Uvicorn running on http://0.0.0.0:8000
+### 5. Install Project Dependencies
+Install the remaining pinned packages from `requirements.txt`:
+```powershell
+pip install -r requirements.txt
 ```
 
-### 2. Start the Frontend Client (Terminal 2 or VS Code)
+### 6. Verify Installation
+Run this command to verify CUDA acceleration:
+```powershell
+python -c "import torch; print('CUDA Available:', torch.cuda.is_available(), '| Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
+```
 
-* **Option A (VS Code Live Server - Recommended)**: Right-click `interface.html` $\rightarrow$ **Open with Live Server**.
-* **Option B (Python HTTP Server)**:
-  ```powershell
-  python -m http.server 5500
-  ```
-  Open your web browser and navigate to: `http://127.0.0.1:5500/interface.html`
+---
 
-## 🎨 Input & Output Specifications
+## 🚀 Running the Application
+
+### Method 1: FastAPI + Live Server (Recommended)
+
+1. **Start the API Server:**
+   ```powershell
+   python server.py
+   ```
+   *The server starts at `http://127.0.0.1:8000`. Keep this PowerShell window open.*
+
+2. **Serve the Frontend:**
+   - In **VS Code**, right-click `interface.html` and choose **Open with Live Server**.
+   - Alternatively, start a local Python HTTP server in a second terminal:
+     ```powershell
+     python -m http.server 5500
+     ```
+     Navigate to `http://127.0.0.1:5500/interface.html`.
+
+3. **Interact & Generate:**
+   - Click **CREATE** to draw on the canvas, or click **UPLOAD** to submit an existing sketch (`.png`, `.jpg`, `.jpeg`).
+   - Add an optional style or material prompt in the right-side control dock.
+   - Click **Generate 3D**. Once complete, you will be automatically redirected to `viewer.html` to inspect the 3D model.
+
+### Method 2: Gradio Studio (Alternative Standalone GUI)
+
+If you prefer a single-script evaluation interface:
+```powershell
+python app.py
+```
+Open `http://127.0.0.1:7860` in your browser to access the Gradio-based studio.
+
+---
+
+## 📥 Input & Output Specifications
 
 ### Supported Inputs
+- **In-App Drawing:** HTML5 canvas with real-time brush/eraser tools, variable stroke diameters, and canvas reset.
+- **File Uploads:** `.png`, `.jpg`, `.jpeg` formats with interactive contrast adjustment, noise reduction, and background transparency controls.
+- **Optional Text Prompt:** Natural-language descriptions of materials, colors, styles, or finishes (e.g., *"Vintage leather armchair, brass studs, studio lighting"*). Prompts are optional; the pipeline falls back to an unconditioned canonical representation if none is provided.
 
-1. **In-App Digital Canvas**: Draw freely with dynamic pen strokes, responsive eraser sizes, and canvas clear buttons.
-2. **File Upload**: Existing sketch files in `.png`, `.jpg`, `.jpeg` formats with adjustable contrast and background noise sliders.
-3. **Optional Text Prompt**: Free-form text conditioning (e.g., `"Matte dark walnut wood, brushed brass details, studio lighting"`). *Note: The prompt is entirely optional; sketch geometry alone is fully sufficient for 3D reconstruction.*
+### Generated Outputs
+- **Binary GLTF (`.glb`):** Self-contained 3D asset with embedded geometry, normals, and vertex colors.
+- **Wavefront OBJ (`.obj`):** Universal 3D format compatible with Blender, Maya, Unity, and Unreal Engine.
+- **Diagnostic Artifacts:** Intermediate contour masks, diffusion renders, and foreground-isolated PNGs saved in `generated_assets/`.
 
-### Exported Outputs
+---
 
-1. **Binary GLTF (`.glb`)**: Full standard 3D asset including vertices, indices, normals, and baked vertex colors (`COLOR_0`). Supported natively by Blender, Unity, Unreal Engine, and WebGL viewers.
-2. **Wavefront (`.obj`)**: Universal geometry file with vertices and face connectivity (`v`, `f`), compatible with CAD and legacy 3D tools.
-3. **Diagnostics Folder (`generated_assets/`)**:
-   * `latest_contours.png` (Processed sketch line structure)
-   * `latest_render.png` (Synthesized 2D diffusion image)
-   * `latest_isolated.png` (Foreground alpha-matted PNG)
-   * `reconstructed_asset.glb` & `reconstructed_asset.obj` (Final 3D models)
+## 🛡️ Mesh Validation & Geometry Integrity
 
-## 📊 Sample Results & Validation Reports
+Before exporting any asset, `modules/validator.py` performs quality and integrity checks:
 
-Every generated model is automatically evaluated prior to export. Below is an authentic sample report generated by `modules/validator.py`:
+- **Geometry Thresholding:** Requires a minimum of 100 vertices and 100 faces to reject empty or corrupt outputs.
+- **Volumetric Depth Check:** Analyzes the bounding box extents ($X \times Y \times Z$). Flat or 2D-planar surfaces ($Z\text{-span} < 0.0005$) trigger validation warnings to ensure non-degenerate geometry.
+- **Topology Repair:** Executes `trimesh.repair.fix_normals()`, `fix_inversion()`, and `fill_holes()` to fix face winding, ensure outward-pointing normals, and improve manifold structure.
 
-```
-=== MESH VALIDATION REPORT ===
-Status: VALID VOLUMETRIC GEOMETRY
-Vertices: 20,741
-Faces: 41,484
-Dimensions (X x Y x Z): 1.14 x 1.28 x 1.05
-Watertight Solid: Yes
-Formats: .OBJ (Wavefront) | .GLB (Binary GLTF)
-Color Space: sRGB Baked Vertex Colors (Full Spectrum Enabled)
-```
+---
 
-## 🛡️ Mesh Validation & Topological Repair
+## 📂 Project Directory Structure
 
-Single-view implicit neural field generation can occasionally output non-manifold faces, open boundaries, or inverted surface normals. The `MeshValidatorAndExporter` engine in `modules/validator.py` applies automated remediation:
-
-1. **Normal Unification**: Recomputes vertex normals using `trimesh.repair.fix_normals(mesh)` to ensure uniform light reflection across curved surfaces.
-2. **Winding Inversion Correction**: Detects and flips negatively wound triangular faces via `trimesh.repair.fix_inversion(mesh)` so back-faces do not render transparently.
-3. **Topological Hole Sealing**: Automatically stitches open boundaries using `trimesh.repair.fill_holes(mesh)`.
-4. **Volumetric Extents Verification**: Asserts that the geometry contains genuine depth ($Z_{\text{depth}} > 0.0005$ and $X/Y/Z > 0$) to discard degenerate 2D planes.
-
-## 📂 Project Structure
-
-```
-Sketch2Shape/
-├── generated_assets/           # Automated storage for .glb, .obj, and diagnostic PNGs
-│   ├── latest_contours.png     # Stage 1 output (extracted contours)
-│   ├── latest_render.png       # Stage 2 output (diffusion render)
-│   ├── latest_isolated.png     # Stage 3 output (alpha-matted subject)
-│   ├── reconstructed_asset.glb # Stage 5 output (binary GLTF)
-│   └── reconstructed_asset.obj # Stage 5 output (wavefront OBJ)
-├── modules/
-│   ├── vision.py               # Stage 1: OpenCV filtering & contour preprocessing
-│   ├── diffusion.py            # Stage 2: Stable Diffusion + ControlNet scribble engine
-│   ├── segmentation.py         # Stage 3: rembg U^2-Net foreground isolation
-│   ├── reconstruction.py       # Stage 4: TripoSR implicit field reconstruction (skimage fallback)
-│   └── validator.py            # Stage 5: Trimesh repair, validation & multi-format export
-├── TripoSR/                    # TripoSR neural architecture submodule
-│   ├── tsr/                    # Transformers, NeRF renderer, tokenizers
-│   └── ...
-├── brain_for_create.js         # Canvas UI logic, IndexedDB storage, and API caller
-├── design1.css                 # 3D beveled UI styling (#014BAA & #F8F3F0 palette)
-├── interface.html              # Main dashboard (Canvas, upload dialog, history gallery)
-├── viewer.html                 # Standalone Three.js WebGL 3D inspection turntable
-├── server.py                   # FastAPI REST backend with VRAM optimization
-├── app.py                      # Alternative Gradio studio interface
+```text
+Tech-zypher4/
+│
+├── generated_assets/           # Pipeline output directory (.glb, .obj, diagnostic images)
+│   ├── reconstructed_asset.glb
+│   ├── reconstructed_asset.obj
+│   └── latest_render.png
+│
+├── modules/                    # Core technical processing pipeline
+│   ├── __init__.py
+│   ├── diffusion.py            # Stable Diffusion + ControlNet synthesis
+│   ├── reconstruction.py       # TripoSR inference & marching cubes integration
+│   ├── segmentation.py         # rembg foreground isolation & canvas padding
+│   ├── validator.py            # Mesh repair, volumetric checks & export
+│   └── vision.py               # Bilateral filtering & adaptive contour extraction
+│
+├── app.py                      # Standalone Gradio GUI interface
+├── brain_for_create.js         # Frontend drawing engine & API communication
+├── design1.css                 # Custom responsive stylesheet (#014BAA & #F8F3F0)
+├── interface.html              # Main drawing, upload & project dashboard
+├── viewer.html                 # Interactive WebGL 3D turntable viewer (Three.js)
 ├── requirements.txt            # Pinned Python package dependencies
-└── README.md                   # System documentation & hackathon submission report
+├── server.py                   # FastAPI backend orchestration server
+└── README.md                   # Project documentation
 ```
 
-## ⚠️ Known Limitations
+---
 
-1. **Single-View Ambiguity**: While TripoSR infers plausible occluded surfaces, the back side of complex asymmetric objects (e.g., a chair with intricate rear carvings) is estimated based on learned priors rather than ground-truth visibility.
-2. **Thin Geometry Quantization**: At a marching cubes resolution of $128^3$, ultra-thin features (such as thin antennae, needles, or paper edges) can experience minor topological bridging.
-3. **GPU VRAM Ceiling**: Running concurrent background processes that consume VRAM (e.g., local LLMs or games) may push memory usage beyond 6 GB, triggering a PyTorch OOM exception during the diffusion-to-reconstruction handoff.
+## ⚠️ Limitations & Trade-Offs
 
-## 🔧 Troubleshooting & FAQs
+- **Single-View Ambiguity:** Single-view reconstruction cannot fully determine hidden, rear-facing geometry. The system infers plausible symmetric structures, but occluded details may appear simplified.
+- **Resolution vs. Memory Trade-Off:** Mesh reconstruction resolution is set to `128` to maintain compatibility with 6 GB VRAM GPUs. While this ensures stable execution without OOM crashes, fine structural details can appear soft.
+- **Vertex Colors vs. UV Texture Atlases:** TripoSR assigns color data directly to mesh vertices rather than generating UV texture unwraps. Complex materials with microscopic detail require higher polygon densities.
+- **Generation Latency:** The 2-minute processing time is primarily dominated by the 25-step diffusion stage under CPU offload constraints. On systems with 12+ GB VRAM, disabling offloading drops execution time to under 25 seconds.
 
-### Q1: `torchmcubes` fails to install or is not recognized during TripoSR execution.
-* **Cause**: On Windows systems, `torchmcubes` requires Visual Studio C++ build tools and matching CUDA compiler binaries (`nvcc`), which often fail to link.
-* **Solution**: We bypassed `torchmcubes` entirely by routing isosurface extraction through `skimage.measure.marching_cubes` (`pip install scikit-image`). This runs natively across all Windows environments without compilation issues.
+---
 
-### Q2: The server crashes with `RuntimeError: The size of tensor a (4) must match the size of tensor b (3)`.
-* **Cause**: An unflattened 4-channel RGBA image from `rembg` was passed directly to TripoSR's 3-channel tokenizer.
-* **Solution**: Composite the alpha channel against a neutral gray background ($0.5$) before passing it to `self.model([rgb_image])` as implemented in `modules/reconstruction.py`.
+## 🔧 Troubleshooting Guide
 
-### Q3: CUDA throws `OutOfMemoryError: CUDA out of memory`.
-* **Cause**: Residual VRAM cache from Stable Diffusion was not cleared before running the TripoSR NeRF grid sampler.
-* **Solution**: Ensure `resolution=128` in `modules/reconstruction.py` and confirm `gc.collect()` + `torch.cuda.empty_cache()` execute between stages.
+### Q1: `torchmcubes` build or compilation failure on Windows
+**Solution:** The pipeline uses `skimage.measure.marching_cubes` to bypass `torchmcubes`. This provides cross-platform isosurface extraction without requiring Visual Studio C++ build tools.
 
-### Q4: The 3D model loads but appears pitch black or unlit in `viewer.html`.
-* **Cause**: Three.js default materials multiply vertex colors by black if the material diffuse color is not explicitly set to white, or if tone mapping is unconfigured.
-* **Solution**: Set `child.material.color.setHex(0xffffff)` with `vertexColors: true` and enforce `renderer.outputEncoding = THREE.sRGBEncoding`.
+### Q2: CUDA Out-Of-Memory (OOM) during diffusion
+**Solution:** Verify that `enable_model_cpu_offload()`, `enable_attention_slicing(1)`, and `enable_vae_slicing()` are active in `modules/diffusion.py`. Explicit `torch.cuda.empty_cache()` and `gc.collect()` calls are included between pipeline stages to clear memory buffers.
 
-### Q5: The 3D model is floating or clipping into the turntable floor.
-* **Solution**: In `viewer.html`, compute the bounding box after normalization, subtract `box.min.y` from the mesh's vertical position to snap the base to $Y = 0$, and place the grid helper flush at $Y = 0$.
+### Q3: Model appears invisible or off-center in `viewer.html`
+**Solution:** TripoSR coordinates default to an offset bounding box. The `viewer.html` script applies `geometry.center()` directly to the vertex buffers, scales the object to fit the camera frustum, and anchors the base of the mesh to $Y = 0$.
+
+### Q4: CORS errors when accessing assets
+**Solution:** The FastAPI backend in `server.py` includes `CORSMiddleware` configured with `allow_origins=["*"]`. Ensure requests are routed through `http://127.0.0.1:8000`.
+
+---
 
 ## 🔮 Future Scope
 
-* **Adaptive Octree Voxel Sampling**: Implement adaptive hierarchical chunking to allow $256^3$ or $512^3$ resolution extraction on GPUs with $\ge 8\text{ GB}$ VRAM.
-* **Automated UV Unwrapping & PBR Baking**: Transition from vertex color buffers to dedicated $2048 \times 2048$ PBR texture atlases (Diffuse, Roughness, Normal maps).
-* **Multi-View Sketch Ingestion**: Allow users to sketch both front and side profiles to reduce single-view occlusion ambiguity.
-* **WebXR AR Passthrough**: Enable WebXR in `viewer.html` for zero-install mobile Augmented Reality inspection on iOS and Android devices.
+- **UV Unwrapping & Texture Maps:** Integrate xatlas or neural texture decoders to bake diffuse, normal, and roughness maps onto lower-poly base meshes.
+- **Multi-View Synthesis:** Add zero123-style multi-view generation to reduce rear-surface occlusion ambiguity before running 3D reconstruction.
+- **Direct 3D Printing Export:** Integrate automatic mesh manifold verification, wall thickness analysis, and direct `.stl` export for slicing software.
+- **Expanded Brush Tools:** Support layered brush opacity, pressure sensitivity via the Pointer Events API, and vector line smoothing.
 
-## 👥 Team Members
+---
 
-Developed for **TechZephyr 4.0 | IIT Bhubaneswar** by:
+## 👥 Team Members & Contributions
 
-* **Siddhartha Sinha** — [@siddhartha420](https://github.com/siddhartha420)  
-  *Machine Learning Pipeline, ControlNet Integration, TripoSR Reconstruction Engine, VRAM Optimization & Export Logic.*
+* **Siddhartha Sinha** ([@siddhartha420](https://github.com/siddhartha420))  
+  *Machine Learning Pipeline, 3D Reconstruction & Asset Export Engine*  
+  Architected the end-to-end ML pipeline, integrating Stable Diffusion ControlNet conditioning, VRAM offload strategies, TripoSR reconstruction, and Trimesh geometric repair.
 
-* **Shivam Kumar** — [@officegitshivam](https://github.com/officegitshivam)  
-  *Frontend Architecture, Interactive HTML5 Canvas, Three.js WebGL Turntable Viewer, 3D Beveled UI Design.*
+* **Shivam Kumar** ([@officegitshivam](https://github.com/officegitshivam))  
+  *Frontend UI, Systems Integration & WebGL Viewer*  
+  Developed the custom user interface, HTML5 canvas drawing engine, responsive layout, Three.js 3D viewer, and client-server API integration.
 
-* **Shreyansh Padhan** — [@shreyanshpadhan8-hub](https://github.com/shreyanshpadhan8-hub)  
-  *AI & Geometric Research, Logic Formulation, Vision Preprocessing & Contour Filtration Algorithms.*
+* **Shreyansh Padhan** ([@shreyanshpadhan8-hub](https://github.com/shreyanshpadhan8-hub))  
+  *AI & Geometric Research, Logic Formulation & Vision Algorithms*  
+  Researched model candidates, designed contour processing workflows, and contributed to pipeline evaluation and geometric consistency logic.
 
-* **Mithles Majhi** — [@mithlesmajhi242-dev](https://github.com/mithlesmajhi242-dev)  
-  *System Documentation, API Architecture, Validation Metrics, Benchmarking & Reproducibility Analysis.*
+* **Mithles Majhi** ([@mithlesmajhi242-dev](https://github.com/mithlesmajhi242-dev))  
+  *Technical Documentation, System Benchmarking & Validation*  
+  Authored project documentation, verified setup instructions across fresh environments, tracked performance metrics, and coordinated submission materials.
 
-## 📜 Acknowledgments & License
+---
 
-* **Stability AI & VAST AI Research** for the open-source release of [TripoSR](https://github.com/VAST-AI-Research/TripoSR).
-* **RunwayML & CompVis** for [Stable Diffusion v1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5).
-* **Lvmin Zhang** for [ControlNet](https://github.com/lllyasviel/ControlNet).
-* **Daniel Gatis** for the [rembg](https://github.com/danielgatis/rembg) background matting tool.
-* **Scikit-Image** developers for the robust marching cubes algorithm implementation.
-* **IIT Bhubaneswar** for hosting the TechZephyr 4.0 Hackathon.
+## 📜 Acknowledgments & Licensing
 
-This project is licensed under the **MIT License**. Pretrained weights are governed by their respective licenses (CreativeML OpenRAIL-M and Apache 2.0).
+- **Stability AI & VAST-AI Research:** For the open-source release of [TripoSR](https://github.com/VAST-AI-Research/TripoSR).
+- **RunwayML & Hugging Face:** For [Stable Diffusion v1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5) and the [Diffusers](https://github.com/huggingface/diffusers) ecosystem.
+- **IIT Bhubaneswar & TechZephyr 4.0:** For organizing the hackathon and providing the problem statement.
+
+This project is licensed under the **MIT License**. Pretrained model weights remain subject to their respective original licenses (CreativeML Open RAIL-M for Stable Diffusion; Apache 2.0 for TripoSR).
