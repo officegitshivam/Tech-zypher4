@@ -134,6 +134,14 @@ body {
 }
 
 /* Processing Dialog (Upload Workflow) */
+#processing-status {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-blue, #014BAA);
+  min-height: 20px;
+  margin-top: 6px;
+  text-align: center;
+}
 .processing-dialog {
   width: min(1120px, 96vw);
   max-width: none;
