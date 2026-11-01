@@ -657,15 +657,20 @@ saveProcessedImageButton.addEventListener("click", async () => {
   }
 });
 
-generate3dFromUploadButton.addEventListener("click", async () => {
+generate3dFromUploadButton.addEventListener("click", async (event) => {
+  event.preventDefault();
   if (!processingFile || generate3dFromUploadButton.disabled) return;
+
   try {
+    processingStatus.textContent = "Preparing uploaded image...";
     const imageBlob = await getProcessedPng();
     const prompt = processingPromptInput.value;
-    processingDialog.close();
+
     await sendTo3DPipeline(imageBlob, prompt, processingStatus, generate3dFromUploadButton);
+    processingDialog.close();
   } catch (err) {
     processingStatus.textContent = `3D error: ${err.message}`;
+    console.error("Upload 3D Generation Error:", err);
   }
 });
 
