@@ -1,4 +1,4 @@
-[project_readme (1).md](https://github.com/user-attachments/files/34226002/project_readme.1.md)
+[project_readme.md](https://github.com/user-attachments/files/34226002/project_readme.1.md)
 # 🖌️ Sketch2Shape AI: From a 2D Sketch to a 3D Asset
 > **TechZephyr 4.0 | 24-Hour Live Hackathon | Computer Vision & Generative AI**  
 > *Developed for IIT Bhubaneswar Hackathon Challenge*
