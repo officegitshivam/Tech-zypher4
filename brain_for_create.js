@@ -666,6 +666,16 @@ generate3dFromUploadButton.addEventListener("click", async (event) => {
     const imageBlob = await getProcessedPng();
     const prompt = processingPromptInput.value;
 
+    const fileName = processedFileName(processingFile.name);
+    await saveDrawingToHistory({
+      id: `upload-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      kind: "upload",
+      name: fileName,
+      createdAt: new Date().toISOString(),
+      image: imageBlob
+    });
+    await renderUploadedFiles();
+
     await sendTo3DPipeline(imageBlob, prompt, processingStatus, generate3dFromUploadButton);
     processingDialog.close();
   } catch (err) {
